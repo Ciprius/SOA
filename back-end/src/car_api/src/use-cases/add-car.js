@@ -1,6 +1,6 @@
 import makeCar from '../car';
 
-export default function makeAddCar({carsDB}) {
+export default function makeAddCar(carsDB) {
     return async function addCar (carInfo) {
         const car = makeCar(carInfo);
         
