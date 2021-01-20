@@ -7,12 +7,24 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-app.get('/user', (req, res) => {
-    getUser().then(user => {
-        if (user.length) {
+app.get('/user/:id', (req, res) => {
+    const id = req.params;
+    getUser(id).then(user => {
+        if (user) {
             res.status(200).json(user);
         } else {
-            res.status(400).json({message: "Cars list is empty"});
+            res.status(400).json({message: "user list is empty"});
+        }
+    });
+});
+
+app.get('/user', (req, res) => {
+    const id = req.params;
+    getUser(id).then(user => {
+        if (user) {
+            res.status(200).json(user);
+        } else {
+            res.status(400).json({message: "user list is empty"});
         }
     });
 });
@@ -23,7 +35,7 @@ app.post('/user', (req, res) => {
         if (user) {
             res.status(201).json(user);
         } else {
-            res.status(400).json({message: "Cannot add the specified car"});
+            res.status(400).json({message: "Cannot add the specified user or the user already exists"});
         }
     });
 });

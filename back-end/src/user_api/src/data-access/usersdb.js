@@ -8,7 +8,9 @@ const dbCollection = constants.dbCollection;
 
 export default function makeUsersDB(makeDB) {
     return Object.freeze({
-        
+        insert,
+        findById,
+        findByUserNameAndPassword
     });
 
     function getMongoClient() {
@@ -17,6 +19,18 @@ export default function makeUsersDB(makeDB) {
 
     function getMongoCollection(client) {
         return client.db(dbName).collection(dbCollection);
+    }
+
+    async function findAll() {
+        const client = await getMongoClient().connect();
+
+        const result = await getMongoCollection(client).find().toArray();
+        client.close();
+
+        return result.map(({ _id: id, ...found }) => ({
+            id,
+            ...found,
+        }));
     }
     
     async function insert({...userInfo}) {
@@ -35,6 +49,21 @@ export default function makeUsersDB(makeDB) {
         client.close();
 
         if (result.length === 0) return null;
-        return result[0];
+        return result.map(({ _id: id, ...found }) => ({
+            id,
+            ...found,
+        }));
+    }
+    
+    async function findByUserNameAndPassword({...userInfo}) {
+        const client = await getMongoClient().connect();
+        const query = {userName: userInfo.userName, password: userInfo.password};
+
+        const result = await getMongoCollection(client).find(query).toArray();
+        client.close();
+        return result.map(({ _id: id, ...found }) => ({
+            id,
+            ...found,
+        }));
     }
 }
