@@ -1,0 +1,19 @@
+version: '3'
+services:
+  car_api:
+    build: './src/car_api'
+    ports:
+      - 3001:3001
+    container_name: car_api
+    image: car_api
+    restart: on-failure
+
+  reverse-proxy:
+    image: nginx:latest
+    container_name: reverse_proxy
+    depends_on:
+      - car_api
+    volumes:
+      - ./default.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
