@@ -6,7 +6,7 @@ export default function makeAddUser(usersDB, makeUser) {
             password: user.getUserPassword(),
         });  
         
-        if (exists.length) {
+        if (exists?.length) {
             return null;
         }
         

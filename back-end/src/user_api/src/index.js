@@ -1,11 +1,22 @@
 const express = require('express');
 const cors = require('cors');
 import bodyParser from 'body-parser';
-import {postUser, getUser} from './controllers';
+import {postUser, getUser, getUsers, logInUserC} from './controllers';
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
+
+app.get('/user/login', (req, res) => {
+    const userInfo = req.body;
+    logInUserC(userInfo).then(user => {
+        if (user?.length) {
+            res.status(200).json(user);
+        } else {
+            res.status(400).json({message: "Cannot log in, the user might not exist"});
+        }
+    });
+});
 
 app.get('/user/:id', (req, res) => {
     const id = req.params;
@@ -19,10 +30,9 @@ app.get('/user/:id', (req, res) => {
 });
 
 app.get('/user', (req, res) => {
-    const id = req.params;
-    getUser(id).then(user => {
-        if (user) {
-            res.status(200).json(user);
+    getUsers().then(users => {
+        if (users) {
+            res.status(200).json(users);
         } else {
             res.status(400).json({message: "user list is empty"});
         }

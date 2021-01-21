@@ -12,7 +12,8 @@ export default function makeCarsDb (makeDB) {
         insert,
         update,
         remove,
-        findById        
+        findById,
+        findCarsByOwner        
     });
     
     function getMongoClient() {
@@ -70,5 +71,16 @@ export default function makeCarsDb (makeDB) {
         
         if (result.length === 0) return null;
         return result[0];
+    }
+    
+    async function findCarsByOwner({...owner}) {
+        const client = await getMongoClient().connect();
+        const result = await getMongoCollection(client).find(owner).toArray();
+        client.close();
+
+        return result.map(({ _id: id, ...found }) => ({
+            id,
+            ...found,
+        }));
     }
 }

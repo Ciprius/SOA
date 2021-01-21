@@ -1,15 +1,26 @@
 const express = require('express');
 const cors = require('cors');
 import bodyParser from 'body-parser';
-import {deleteCar, getCars, postCar, updateCar} from './controllers';
+import {deleteCar, getCars, postCar, updateCar, getOwnerCars} from './controllers';
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
+app.get('/car/:ownerName', (req, res) => {
+    const ownerName = req.params;
+    getOwnerCars(ownerName).then(cars => {
+        if (cars?.length) {
+            res.status(200).json(cars);
+        } else {
+            res.status(400).json({message: "Cars list is empty"});
+        }
+    });
+});
+
 app.get('/car', (req, res) => {
     getCars().then(cars => {
-        if (cars.length) {
+        if (cars?.length) {
             res.status(200).json(cars);
         } else {
             res.status(400).json({message: "Cars list is empty"});

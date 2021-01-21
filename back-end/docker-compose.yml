@@ -7,6 +7,14 @@ services:
     container_name: car_api
     image: car_api
     restart: on-failure
+  
+  user_api:
+    build: './src/user_api'
+    ports:
+      - 3002:3002
+    container_name: user_api
+    image: user_api
+    restart: on-failure
 
   reverse-proxy:
     image: nginx:latest

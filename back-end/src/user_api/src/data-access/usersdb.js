@@ -10,7 +10,8 @@ export default function makeUsersDB(makeDB) {
     return Object.freeze({
         insert,
         findById,
-        findByUserNameAndPassword
+        findByUserNameAndPassword,
+        findAll
     });
 
     function getMongoClient() {
