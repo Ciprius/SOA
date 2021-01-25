@@ -1,11 +1,11 @@
 <template>
-  <div class="log-in">
+  <div class="register">
     <form>
       <md-card class="md-layout-item md-size-25 md-small-size-50">
         <md-card-header>
-          <div class="md-title">Log in</div>
+          <div class="md-title">Register</div>
         </md-card-header>
-
+  
         <md-card-content>
           <div class="md-layout md-gutter">
             <div class="md-layout-item md-small-size-50">
@@ -14,7 +14,7 @@
                 <md-input name="user-name" id="user-name" v-model="userName" :disabled="sending" />
               </md-field>
             </div>
-
+  
             <div class="md-layout-item md-small-size-50">
               <md-field>
                 <label for="password">Password</label>
@@ -23,13 +23,13 @@
             </div>
           </div>
         </md-card-content>
-
+  
         <md-progress-bar md-mode="indeterminate" v-if="sending" />
-
+  
         <md-card-actions>
-          <md-button class="md-raised md-primary" :disabled="sending" @click="logIn">
-            <font-awesome-icon icon="sign-in-alt"></font-awesome-icon>
-            Log In
+          <md-button class="md-raised md-primary" :disabled="sending" @click="goBack">
+            <font-awesome-icon icon="arrow-left"></font-awesome-icon>
+            Back
           </md-button>
           <md-button class="md-raised md-primary" :disabled="sending" @click="register">
             <font-awesome-icon icon="user-plus"></font-awesome-icon>
@@ -37,7 +37,7 @@
           </md-button>
         </md-card-actions>
       </md-card>
-      
+  
       <md-snackbar :md-position="position" :md-duration="duration" :md-active.sync="showSnackbar" md-persistent>
         <span>{{ message }}</span>
       </md-snackbar>
@@ -48,7 +48,7 @@
 <script>
 import userService from '../service/user-service';
 export default {
-  name: 'FormValidation',
+  name: 'Register_Comp',
   data: () => ({
     userName: null,
     password: null,
@@ -63,40 +63,34 @@ export default {
       this.userName = null;
       this.password = null;
     },
-    logIn() {
-      if (!this.password || !this.userName) {
-        this.showSnackbar = true;
-        this.message = 'User name and/or password must not be empty.';
-        return;
-      }
-      this.showSnackbar = !!this.showSnackbar;
-      
+    register() {
       let thisComp = this;
       this.sending = true;
-      userService.getLogin(this.userName, this.password)
-        .then(data => {
-          if (Array.isArray(data.data)) {
-            const userInfo = data.data[0];
-            localStorage.setItem("userName",userInfo.userName);
-            thisComp.$router.push({ path:'/cars'});
+      userService.addUser(this.userName,this.password)
+        .then(response => {
+          if (response.status == 201){
+            this.$router.push({path: "/"});
           } else {
             thisComp.showSnackbar = true;
-            thisComp.message = 'User name and/or password does not exist.';
+            thisComp.message = 'User already exists.';
           }
-        }).catch(error => {
+        })
+        .catch(error => {
           console.log(error);
           thisComp.showSnackbar = true;
-          thisComp.message = 'We encounter an error, try again later.';
-        }).finally(() => {
+          thisComp.message = 'User already exists or there is a problem.';
+        })
+        .finally(() => {
           this.clearForm();
           thisComp.sending = false;
         });
     },
-    register() {
-      this.$router.push({ path:'/register' });  
-    },
+    goBack() {
+      this.$router.push({path: "/"});
+    }
   }
 }
+
 </script>
 
 <style scoped>
@@ -113,10 +107,11 @@ export default {
   flex-wrap: unset;
   display: unset;
 }
-.log-in {
+.register {
   width: 100%;
   height: 100vh;
   padding-top: 200px;
-  background-image: url("../assets/carlo-d-agnolo-aFxSh_l4fbY-unsplash.jpg");
+  background-image: url("../assets/Register_photo.jpg");
+  background-size: cover;
 }
 </style>

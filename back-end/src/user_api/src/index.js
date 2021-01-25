@@ -7,7 +7,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-app.get('/user/login', (req, res) => {
+app.post('/user/login', (req, res) => {
     const userInfo = req.body;
     logInUserC(userInfo).then(user => {
         if (user?.length) {
