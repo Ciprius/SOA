@@ -1,14 +1,16 @@
 <template>
   <div>
-    <div>
-      {{ userName }}
-    </div>
+    <CarList :userName="userName"/>
   </div>
 </template>
 
 <script>
+import CarList from '@/components/CarList';
 export default {
   name: 'Cars',
+  components: {
+    CarList,
+  },
   data() {
     return {
       userName: '',
@@ -16,7 +18,6 @@ export default {
   },
   created() {
     const userName = localStorage.getItem('userName');
-    console.log(userName);
     if (!userName) {
       this.$router.push({ path: "/" });
     }

@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import Register_Comp from '@/components/Register_Comp';
+import Register_Comp from '@/components/RegisterComp';
 export default {
   name: 'Register_View',
   components: {

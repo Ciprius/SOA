@@ -5,10 +5,38 @@ import VueMaterial from 'vue-material';
 import 'vue-material/dist/vue-material.min.css';
 import 'vue-material/dist/theme/default.css';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faUserSecret, faSignInAlt, faUserPlus, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faUserSecret, 
+  faSignInAlt, 
+  faUserPlus, 
+  faArrowLeft, 
+  faWeightHanging, 
+  faWeight, 
+  faHorse,
+  faWrench,
+  faArrowDown,
+  faTachometerAlt,
+  faBong,
+  faWarehouse,
+  faTrash,
+  faPen,
+  faPlus} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
-library.add(faUserSecret, faSignInAlt, faUserPlus, faArrowLeft);
+library.add(faUserSecret, 
+            faSignInAlt, 
+            faUserPlus, 
+            faArrowLeft, 
+            faWeightHanging, 
+            faWeight, 
+            faHorse, 
+            faWrench, 
+            faArrowDown, 
+            faTachometerAlt,
+            faBong,
+            faWarehouse,  
+            faTrash, 
+            faPen,
+            faPlus);
 
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.config.productionTip = false;

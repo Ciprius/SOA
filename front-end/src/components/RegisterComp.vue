@@ -64,6 +64,12 @@ export default {
       this.password = null;
     },
     register() {
+      if (!this.password || !this.userName) {
+        this.showSnackbar = true;
+        this.message = 'User name and/or password must not be empty.';
+        return;
+      }
+      
       let thisComp = this;
       this.sending = true;
       userService.addUser(this.userName,this.password)

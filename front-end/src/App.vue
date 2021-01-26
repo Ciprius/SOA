@@ -19,4 +19,7 @@ export default {
 #nav {
   display: none;
 }
+.md-theme-default {
+  overflow: hidden;
+}
 </style>
