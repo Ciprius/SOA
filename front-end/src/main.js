@@ -19,7 +19,9 @@ import { faUserSecret,
   faWarehouse,
   faTrash,
   faPen,
-  faPlus} from '@fortawesome/free-solid-svg-icons';
+  faPlus,
+  faBan,
+  faSave} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 library.add(faUserSecret, 
@@ -36,7 +38,9 @@ library.add(faUserSecret,
             faWarehouse,  
             faTrash, 
             faPen,
-            faPlus);
+            faPlus,
+            faBan,
+            faSave);
 
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.config.productionTip = false;

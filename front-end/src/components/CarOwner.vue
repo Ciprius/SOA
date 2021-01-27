@@ -24,30 +24,64 @@
             <md-card-content id="EngineNRContent">
               <div id="HP">
                 <h4><font-awesome-icon icon="horse"></font-awesome-icon> Power:</h4>
-                <p>{{ car.horsePower }} Hp</p>
+                <input 
+                  :value="car.horsePower" 
+                  :class="getClasses(index)" 
+                  v-if="isEdit[index]"
+                  @input="power = $event.target.value"
+                  type="number"/>
+                <p v-else-if="!isEdit[index]">{{ car.horsePower }} Hp</p>
               </div>
               <div id="Torque">
-                <h4><font-awesome-icon icon="wrench"></font-awesome-icon> Torque:</h4>
-                <p>{{ car.torque }} NM</p>
+                <h4>
+                  <font-awesome-icon icon="wrench"></font-awesome-icon> 
+                  Torque:
+                </h4>
+                <input 
+                  :value="car.torque" 
+                  :class="getClasses(index)" 
+                  v-if="isEdit[index]"
+                  @input="torque = $event.target.value"
+                  type="number"/>
+                <p v-else-if="!isEdit[index]">{{ car.torque }} NM</p>
               </div>
             </md-card-content>
             
             <md-divider></md-divider>
             
             <md-card-content id="WeightContent">
-              <h4><font-awesome-icon icon="weight-hanging"></font-awesome-icon> Weigth:</h4>
-              <p>{{ car.weight }} Kg</p>
+              <h4>
+                <font-awesome-icon icon="weight-hanging"></font-awesome-icon> 
+                Weigth:
+              </h4>
+              <input 
+                :value="car.weight" 
+                :class="getClasses(index)" 
+                v-if="isEdit[index]"
+                @input="weight = $event.target.value"
+                type="number"/>
+              <p v-else-if="!isEdit[index]">{{ car.weight }} Kg</p>
             </md-card-content>
             
             <md-divider></md-divider>
             
             <md-card-actions>
-              <md-button :to="'/book/' + car.id ">
-                <font-awesome-icon icon="pen"/> Edit
-              </md-button>
-              <md-button class="md-accent" @click="deleteCar(car.id)">
-                <font-awesome-icon icon="trash"/> Delete
-              </md-button>
+              <div v-if="!isEdit[index]">
+                <md-button :disabled="isDisabled[index]" @click="toggleEdit(true, index)">
+                  <font-awesome-icon icon="pen"/> Edit
+                </md-button>
+                <md-button :disabled="isDisabled[index]" class="md-accent" @click="deleteCar(car.id)">
+                  <font-awesome-icon icon="trash"/> Delete
+                </md-button>
+              </div>
+              <div v-else-if="isEdit[index]">
+                <md-button class="md-primary" @click="updateCarInfo(index, car)">
+                  <font-awesome-icon icon="save"/> Save
+                </md-button>
+                <md-button class="md-accent" @click="toggleEdit(false, index)">
+                  <font-awesome-icon icon="ban"/> Cancel
+                </md-button>
+              </div>
             </md-card-actions>
             
             <md-card-expand>
@@ -60,12 +94,46 @@
               
               <md-card-expand-content>
                 <md-card-content id="EngineContent">
-                  <h4><font-awesome-icon icon="bong"></font-awesome-icon> Engine:</h4>
-                  <p>{{ car['engine'] }}</p>
-                  <h4><font-awesome-icon icon="warehouse"></font-awesome-icon> Engine capacity:</h4>
-                  <p>{{ car.engineCapacity }} Liters</p>
-                  <h4><font-awesome-icon icon="tachometer-alt"></font-awesome-icon> Spected for:</h4>
-                  <p>{{ car.spectedFor }}</p>
+                  <div class="div-engine">
+                    <h4>
+                      <font-awesome-icon icon="bong"></font-awesome-icon> 
+                      Engine:
+                    </h4>
+                    <input 
+                      :value="car['engine']" 
+                      :class="getClasses(index)" 
+                      class="engine" 
+                      v-if="isEdit[index]"
+                      @input="engine = $event.target.value"/>
+                    <p v-else-if="!isEdit[index]">{{ car['engine'] }}</p>
+                  </div>
+                  <div class="div-engine">
+                    <h4>
+                      <font-awesome-icon icon="warehouse"></font-awesome-icon> 
+                      Engine capacity:
+                    </h4>
+                    <input 
+                      :value="car.engineCapacity" 
+                      :class="getClasses(index)" 
+                      class="engine" 
+                      v-if="isEdit[index]"
+                      @input="capacity = $event.target.value"
+                      type="number"/> 
+                    <p v-else-if="!isEdit[index]">{{ car.engineCapacity }} Liters</p>
+                  </div>
+                  <div>
+                    <h4>
+                      <font-awesome-icon icon="tachometer-alt"></font-awesome-icon> 
+                      Spected for:
+                    </h4>
+                    <input 
+                      :value="car.spectedFor" 
+                      :class="getClasses(index)" 
+                      class="spec" 
+                      v-if="isEdit[index]"
+                      @input="spec = $event.target.value"/>
+                    <p v-else-if="!isEdit[index]">{{ car.spectedFor }}</p>
+                  </div>
                 </md-card-content>
               </md-card-expand-content>
               
@@ -81,7 +149,7 @@
       </div>
     </div>
     
-    <md-snackbar :md-position="position" :md-duration="duration" :md-active.sync="showSnackbar" md-persistent>
+    <md-snackbar :md-position="position" :md-duration="isInfinity? Infinity : duration" :md-active.sync="showSnackbar" md-persistent>
       <span>{{ message }}</span>
     </md-snackbar>
   </div>
@@ -99,17 +167,43 @@ export default {
       duration: 4000,
       message: '',
       position: 'center',
+      isInfinity: false,
+      isEdit: [],
+      isDisabled: [],
+      power: '',
+      torque: '',
+      weight: '',
+      engine: '',
+      capacity: '',
+      spec: '',
     };
   },
   created() {
     this.userName = this.$route.params.owner;
+    this.isInfinity = false;
     this.getCarsByOwner();
   },
   methods: {
+    getClasses(index) {
+      const classes = [{'primary': true}];
+      classes.push({'not-edit': !this.isEdit[index]});
+
+      return classes;
+    },
     getCarsByOwner() {
+      const thisComp = this;
       carSerive.getCarsByOwner(this.userName).then(cars => {
         this.$set(this, 'carList', cars.data);
+        thisComp.isEdit.length = cars.data.length;
+        thisComp.isEdit.fill(false, 0);
+        thisComp.isDisabled.length = cars.data.length;
+        thisComp.isDisabled.fill(false, 0);
         console.log(this.carList);
+      }).catch(error => {
+        console.log(error);
+        thisComp.showSnackbar = true;
+        thisComp.isInfinity = true;
+        thisComp.message = 'You do not have any car. Try to add using that red button on the right';
       });
     },
     deleteCar(id) {
@@ -122,6 +216,40 @@ export default {
           thisComp.showSnackbar = true;
           thisComp.message = 'Car deleted successfully.';
         }
+      }).catch(error => {
+        console.log(error);
+        thisComp.showSnackbar = true;
+        thisComp.message = 'Could not delete the car.';
+      });
+    },
+    toggleEdit(value, index) {
+      this.isDisabled.fill(value,0);
+      this.isDisabled.splice(index, 1, false);
+      
+      this.isEdit.splice(index, 1, value);
+    },
+    updateCarInfo(index, car) {
+      const thisComp = this;
+      const carListCopy = this.carList;
+      const {id, ...carInfo} = car;
+      carInfo.horsePower = parseInt(this.power) || carInfo.horsePower;
+      carInfo.torque = parseInt(this.torque) || carInfo.torque;
+      carInfo.weight = parseInt(this.weight) || carInfo.weight;
+      carInfo.engine = this.engine || carInfo.engine;
+      carInfo.engineCapacity = parseInt(this.capacity) || carInfo.engineCapacity;
+      carInfo.spectedFor = this.spec || carInfo.spectedFor;
+      
+      carSerive.updateCar(id, carInfo).then(updatedCar => {
+        carListCopy[index] = updatedCar.data;
+        this.$set(this, 'carList', carListCopy);
+        thisComp.toggleEdit(false, index);
+
+        thisComp.showSnackbar = true;
+        thisComp.message = 'Car updated successfully.';
+      }).catch(error => {
+        console.log(error);
+        thisComp.showSnackbar = true;
+        thisComp.message = 'Could not update the car.';
       });
     }
   }
@@ -129,8 +257,29 @@ export default {
 </script>
 
 <style scoped>
+.primary {
+  height: 25px;
+  margin: auto 0;
+  margin-right: 8px;
+  width: 60px;
+}
+.primary.engine {
+  width: 45px;
+}
+.primary.spec {
+  width: 60px; 
+}
+.div-engine {
+  margin-right: 8px;
+}
+.primary.not-edit {
+  border: none;
+  margin-right: 0;
+  color: black;
+  background-color: white;
+}
 .md-card {
-  width: 520px;
+  width: 620px;
   margin: 0 auto 10px;
   vertical-align: top;
 }

@@ -9,5 +9,10 @@ export default {
     },
     async deleteCar(id) {
         return await axios.delete('http://localhost/cars/'+id);
+    },
+    async updateCar(id, {...carInfo}) {
+        return await axios.patch('http://localhost/cars/'+id, {
+            ...carInfo
+        });
     }
 }
