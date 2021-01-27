@@ -143,7 +143,7 @@
       </div>
       
       <div>
-        <md-button class="md-fab md-plain">
+        <md-button class="md-fab md-plain" :to="'/add/'+ userName">
           <font-awesome-icon icon="plus"></font-awesome-icon>
         </md-button>
       </div>
@@ -152,6 +152,11 @@
     <md-snackbar :md-position="position" :md-duration="isInfinity? Infinity : duration" :md-active.sync="showSnackbar" md-persistent>
       <span>{{ message }}</span>
     </md-snackbar>
+    
+    <div id='spinner' v-if="sending">
+      <md-progress-spinner md-mode="indeterminate"></md-progress-spinner>
+      <md-progress-spinner class="md-accent" md-mode="indeterminate"></md-progress-spinner>
+    </div>
   </div>
 </template>
 
@@ -176,6 +181,7 @@ export default {
       engine: '',
       capacity: '',
       spec: '',
+      sending: false,
     };
   },
   created() {
@@ -192,6 +198,7 @@ export default {
     },
     getCarsByOwner() {
       const thisComp = this;
+      this.sending = true;
       carSerive.getCarsByOwner(this.userName).then(cars => {
         this.$set(this, 'carList', cars.data);
         thisComp.isEdit.length = cars.data.length;
@@ -204,22 +211,30 @@ export default {
         thisComp.showSnackbar = true;
         thisComp.isInfinity = true;
         thisComp.message = 'You do not have any car. Try to add using that red button on the right';
+      }).finally(() => {
+        this.sending = false;
       });
     },
     deleteCar(id) {
       let cars = this.carList;
       const thisComp = this;
+      this.sending = true;
       carSerive.deleteCar(id).then(response => {
         if (response.status === 200) {
           cars = cars.filter((el) => el.id !== id);
           this.$set(this, 'carList', cars);
           thisComp.showSnackbar = true;
           thisComp.message = 'Car deleted successfully.';
+        } else {
+          thisComp.showSnackbar = true;
+          thisComp.message = 'Could not delete the car. Please try again';
         }
       }).catch(error => {
         console.log(error);
         thisComp.showSnackbar = true;
         thisComp.message = 'Could not delete the car.';
+      }).finally(() => {
+        this.sending = false;
       });
     },
     toggleEdit(value, index) {
@@ -232,6 +247,7 @@ export default {
       const thisComp = this;
       const carListCopy = this.carList;
       const {id, ...carInfo} = car;
+      this.sending = true;
       carInfo.horsePower = parseInt(this.power) || carInfo.horsePower;
       carInfo.torque = parseInt(this.torque) || carInfo.torque;
       carInfo.weight = parseInt(this.weight) || carInfo.weight;
@@ -240,16 +256,23 @@ export default {
       carInfo.spectedFor = this.spec || carInfo.spectedFor;
       
       carSerive.updateCar(id, carInfo).then(updatedCar => {
-        carListCopy[index] = updatedCar.data;
-        this.$set(this, 'carList', carListCopy);
-        thisComp.toggleEdit(false, index);
-
-        thisComp.showSnackbar = true;
-        thisComp.message = 'Car updated successfully.';
+        if (updatedCar.status === 200) {
+          carListCopy[index] = updatedCar.data;
+          this.$set(this, 'carList', carListCopy);
+          thisComp.toggleEdit(false, index);
+  
+          thisComp.showSnackbar = true;
+          thisComp.message = 'Car updated successfully.';
+        } else {
+          thisComp.showSnackbar = true;
+          thisComp.message = 'Could not update the car. Please try again';
+        }
       }).catch(error => {
         console.log(error);
         thisComp.showSnackbar = true;
         thisComp.message = 'Could not update the car.';
+      }).finally(() => {
+        this.sending = false;
       });
     }
   }
@@ -321,5 +344,8 @@ h4{
   position: absolute;
   bottom: 40px;
   right: 60px;
+}
+.md-progress-spinner {
+  margin: 24px;
 }
 </style>

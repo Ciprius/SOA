@@ -14,5 +14,10 @@ export default {
         return await axios.patch('http://localhost/cars/'+id, {
             ...carInfo
         });
+    },
+    async addCar({...carInfo}) {
+        return await axios.post('http://localhost/cars', {
+            ...carInfo
+        });
     }
 }
