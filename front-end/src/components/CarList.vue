@@ -97,7 +97,7 @@ export default {
 
 <style scoped>
 .md-card {
-  width: 520px;
+  width: 620px;
   margin: 0 auto 10px;
   vertical-align: top;
 }
