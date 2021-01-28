@@ -207,10 +207,15 @@ export default {
         thisComp.isDisabled.fill(false, 0);
         console.log(this.carList);
       }).catch(error => {
-        console.log(error);
-        thisComp.showSnackbar = true;
-        thisComp.isInfinity = true;
-        thisComp.message = 'You do not have any car. Try to add using that red button on the right';
+        if (String(error).indexOf('403') > -1) {
+          thisComp.showSnackbar = true;
+          thisComp.isInfinity = true;
+          thisComp.message = 'The token session expired. Log in again.';
+        } else {
+          thisComp.showSnackbar = true;
+          thisComp.isInfinity = true;
+          thisComp.message = 'You do not have any car. Try to add using that red button on the right';
+        }
       }).finally(() => {
         this.sending = false;
       });

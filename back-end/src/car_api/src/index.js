@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 import bodyParser from 'body-parser';
 import {deleteCar, getCars, postCar, updateCar, getOwnerCars} from './controllers';
 
@@ -7,55 +8,99 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-app.get('/car/:ownerName', (req, res) => {
+function verifyToken(req, res, next) {
+    const bearerHeader = req.headers['authorization'];
+    
+    if (typeof bearerHeader !== 'undefined') {
+        const bearer = bearerHeader.split(' ');
+        const token = bearer[1];
+        req.token = token;
+        next();
+    } else {
+        res.status(403).json({message: "The token is invalid or does not exist!"});
+    }
+}
+
+app.get('/car/:ownerName', verifyToken,(req, res) => {
     const ownerName = req.params;
-    getOwnerCars(ownerName).then(cars => {
-        if (cars?.length) {
-            res.status(200).json(cars);
+    jwt.verify(req.token, 'secretKey', (err, authData) => {
+        console.log(authData);
+        if (err && ownerName !== authData?.user[0].userName) {
+            res.status(403).json({message: "The token is invalid or does not exist!"});
         } else {
-            res.status(400).json({message: "Cars list is empty"});
+            getOwnerCars(ownerName).then(cars => {
+                if (cars?.length) {
+                    res.status(200).json(cars);
+                } else {
+                    res.status(400).json({message: "Cars list is empty"});
+                }
+            });
         }
     });
 });
 
-app.get('/car', (req, res) => {
-    getCars().then(cars => {
-        if (cars?.length) {
-            res.status(200).json(cars);
+app.get('/car', verifyToken, (req, res) => {
+    jwt.verify(req.token, 'secretKey', (err, authData) => {
+        if (err) {
+            res.status(403).json({ message: "The token is invalid or does not exist!" });
         } else {
-            res.status(400).json({message: "Cars list is empty"});
+            getCars().then(cars => {
+                if (cars?.length) {
+                    res.status(200).json(cars);
+                } else {
+                    res.status(400).json({ message: "Cars list is empty" });
+                }
+            });
         }
     });
 });
 
-app.post('/car', (req, res) => {
+app.post('/car', verifyToken, (req, res) => {
     const carInfo = req.body;
-    postCar(carInfo).then(car => {
-        if (car) {
-            res.status(201).json(car);
+    jwt.verify(req.token, 'secretKey', (err, authData) => {
+        if (err) {
+            res.status(403).json({ message: "The token is invalid or does not exist!" });
         } else {
-            res.status(400).json({message: "Cannot add the specified car"});
+            postCar(carInfo).then(car => {
+                if (car) {
+                    res.status(201).json(car);
+                } else {
+                    res.status(400).json({ message: "Cannot add the specified car" });
+                }
+            });
         }
     });
 });
-app.patch('/car/:id', (req, res) => {
+app.patch('/car/:id', verifyToken, (req, res) => {
     const { id } = req.params;
     const carInfo = { id, ...req.body };
-    updateCar(carInfo).then(car => {
-        if (car) {
-            res.status(200).json(car);
+    jwt.verify(req.token, 'secretKey', (err, authData) => {
+        if (err) {
+            res.status(403).json({ message: "The token is invalid or does not exist!" });
         } else {
-            res.status(404).json({message: "Could not find the car the update"});
+            updateCar(carInfo).then(car => {
+                if (car) {
+                    res.status(200).json(car);
+                } else {
+                    res.status(404).json({ message: "Could not find the car the update" });
+                }
+            });
         }
     });
 });
-app.delete('/car/:id', (req, res) => {
+app.delete('/car/:id', verifyToken, (req, res) => {
     const { id } = req.params;
-    deleteCar(id).then(deleted => {
-        if (deleted) {
-            res.status(200).json(deleted);
+    jwt.verify(req.token, 'secretKey', (err, authData) => {
+        if (err) {
+            res.status(403).json({ message: "The token is invalid or does not exist!" });
         } else {
-            res.status(404).json({message: 'Car to delete not found'});
+            deleteCar(id).then(deleted => {
+                if (deleted) {
+                    res.status(200).json(deleted);
+                } else {
+                    res.status(404).json({ message: 'Car to delete not found' });
+                }
+            });
         }
     });
 });

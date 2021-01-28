@@ -78,6 +78,7 @@ export default {
           if (Array.isArray(data.data)) {
             const userInfo = data.data[0];
             localStorage.setItem("userName",userInfo.userName);
+            localStorage.setItem("token",userInfo.token);
             thisComp.$router.push({ path:'/cars'});
           } else {
             thisComp.showSnackbar = true;

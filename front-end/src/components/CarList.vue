@@ -63,6 +63,10 @@
         </md-card-area>
       </md-card>
     </div>
+
+    <md-snackbar :md-position="position" :md-duration="isInfinity? Infinity : duration" :md-active.sync="showSnackbar" md-persistent>
+      <span>{{ message }}</span>
+    </md-snackbar>
   </div>
 </template>
 
@@ -79,6 +83,11 @@ export default {
   data() {
     return {
       carList: [],
+      showSnackbar: false,
+      duration: 4000,
+      message: '',
+      position: 'center',
+      isInfinity: false,
     };
   },
   created() {
@@ -86,9 +95,16 @@ export default {
   },
   methods: {
     async getCars() {
+      const thisComp = this;
       carSerive.getCars().then(cars => {
         this.$set(this, 'carList', cars.data);
         console.log(this.carList);
+      }).catch(error => {
+        if (String(error).indexOf('403') > -1) {
+          thisComp.showSnackbar = true;
+          thisComp.isInfinity = true;
+          thisComp.message = 'The token session expired. Log in again.';
+        }
       });
     }
   }
